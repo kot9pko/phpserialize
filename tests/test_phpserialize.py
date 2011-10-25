@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import phpserialize
 
 
@@ -11,6 +13,10 @@ def test_dumps_float():
 
 def test_dumps_str():
     assert phpserialize.dumps('Hello world') == 's:11:"Hello world";'
+
+
+def test_dumps_unicode():
+    assert phpserialize.dumps(u'Björk Guðmundsdóttir') == 's:23:"Bj\xc3\xb6rk Gu\xc3\xb0mundsd\xc3\xb3ttir";'
 
 
 def test_dumps_list():
@@ -27,6 +33,10 @@ def test_dumps_dict():
 
 def test_loads_dict():
     assert phpserialize.loads('a:3:{s:1:"a";i:1;s:1:"c";i:3;s:1:"b";i:2;}') == {'a': 1, 'b': 2, 'c': 3}
+
+
+def test_loads_unicode():
+    assert phpserialize.loads('s:23:"Bj\xc3\xb6rk Gu\xc3\xb0mundsd\xc3\xb3ttir";') == 'Björk Guðmundsdóttir'
 
 
 def test_dumps_and_loads_dict():
