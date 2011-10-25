@@ -238,7 +238,7 @@ r"""
     :copyright: 2007-2008 by Armin Ronacher.
     license: BSD
 """
-from io import StringIO
+from io import BytesIO
 
 __author__ = 'Armin Ronacher <armin.ronacher@active-4.com>'
 __version__ = '1.1'
@@ -307,27 +307,39 @@ def dumps(data, charset='utf-8', errors='strict', object_hook=None):
     def _serialize(obj, keypos):
         if keypos:
             if isinstance(obj, (int, float, bool)):
-                return 'i:%i;' % obj
+                return ('i:%i;' % obj).encode(charset)
             if isinstance(obj, str):
                 if isinstance(obj, str):
                     obj = obj.encode(charset, errors)
-                return 's:%i:"%s";' % (len(obj), obj)
+                # return ('s:%i:"%s";' % (len(obj), obj)).encode('utf-8')
+                return b''.join([
+                    ('s:%i:' % len(obj)).encode(charset), 
+                    b'"', 
+                    obj,
+                    b'";'
+                ])
             if obj is None:
-                return 's:0:"";'
+                return b's:0:"";'
             raise TypeError('can\'t serialize %r as key' % type(obj))
         else:
             if obj is None:
-                return 'N;'
+                return b'N;'
             if isinstance(obj, bool):
-                return 'b:%i;' % obj
+                return ('b:%i;' % obj).encode(charset)
             if isinstance(obj, int):
-                return 'i:%s;' % obj
+                return ('i:%s;' % obj).encode(charset)
             if isinstance(obj, float):
-                return 'd:%s;' % obj
+                return ('d:%s;' % obj).encode(charset)
             if isinstance(obj, str):
                 if isinstance(obj, str):
                     obj = obj.encode(charset, errors)
-                return 's:%i:"%s";' % (len(obj), obj)
+                # return ('s:%i:"%s";' % (len(obj), obj)).encode('utf-8')
+                return b''.join([
+                    ('s:%i:' % len(obj)).encode(charset), 
+                    b'"', 
+                    obj,
+                    b'";'
+                ])
             if isinstance(obj, (list, tuple, dict)):
                 out = []
                 if isinstance(obj, dict):
@@ -337,7 +349,13 @@ def dumps(data, charset='utf-8', errors='strict', object_hook=None):
                 for key, value in iterable:
                     out.append(_serialize(key, True))
                     out.append(_serialize(value, False))
-                return 'a:%i:{%s}' % (len(obj), ''.join(out))
+                # return 'a:%i:{%s}' % (len(obj), ''.join(out))
+                return b''.join([
+                    ('a:%i:' % len(obj)).encode(charset),
+                    b'{',
+                    b''.join(out),
+                    b'}',
+                ])
             if isinstance(obj, phpobject):
                 return 'O%s%s' % (
                     _serialize(obj.__name__, True)[1:-1],
@@ -377,14 +395,14 @@ def load(fp, charset='utf-8', errors='strict', decode_strings=False,
         array_hook = dict
 
     def _expect(e):
-        v = fp.read(len(e))
+        v = fp.read(len(e)).decode(charset)
         if v != e:
             raise ValueError('failed expectation, expected %r got %r' % (e, v))
 
     def _read_until(delim):
         buf = []
         while 1:
-            char = fp.read(1)
+            char = fp.read(1).decode(charset)
             if char == delim:
                 break
             elif not char:
@@ -408,7 +426,7 @@ def load(fp, charset='utf-8', errors='strict', decode_strings=False,
         return result
 
     def _unserialize():
-        type_ = fp.read(1).lower()
+        type_ = fp.read(1).lower().decode(charset)
         if type_ == 'n':
             _expect(';')
             return None
@@ -424,7 +442,7 @@ def load(fp, charset='utf-8', errors='strict', decode_strings=False,
             _expect(':')
             length = int(_read_until(':'))
             _expect('"')
-            data = fp.read(length)
+            data = fp.read(length).decode(charset)
             _expect('"')
             if decode_strings:
                 data = data.decode(charset, errors)
@@ -453,7 +471,7 @@ def loads(data, charset='utf-8', errors='strict', decode_strings=False,
     """Read a PHP-serialized object hierarchy from a string.  Characters in the
     string past the object's representation are ignored.
     """
-    return load(StringIO(data), charset, errors, decode_strings,
+    return load(BytesIO(data), charset, errors, decode_strings,
                 object_hook, array_hook)
 
 
