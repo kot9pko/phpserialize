@@ -1,3 +1,19 @@
+Notes for the msabramo/phpserialize fork:
+
+Blog post: http://marc-abramowitz.com/archives/2011/10/25/phpserialize-on-python-3/
+
+To use this fork:
+
+* In a pip requirements file:
+
+    -e git+git://github.com/msabramo/phpserialize.git@python3.x#egg=phpserialize
+
+* In a tox.ini file, in the deps setting:
+
+    https://github.com/msabramo/phpserialize/tarball/python3.x
+
+Notes from the upstream repo below:
+
 a port of the serialize and unserialize functions of php to python. This module
 implements the python serialization interface (eg: provides dumps, loads and
 similar functions).
