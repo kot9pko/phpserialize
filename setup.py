@@ -1,8 +1,8 @@
 import os
 try:
-    from setuptools import setup
+    from setuptools import setup, Command
 except ImportError:
-    from distutils.core import setup
+    from distutils.core import setup, Command
 
 def get_docs():
     result = []
@@ -20,6 +20,17 @@ def get_docs():
         f.close()
     return '\n'.join(result)
 
+class PyTest(Command):
+    user_options = []
+    def initialize_options(self):
+        pass
+    def finalize_options(self):
+        pass
+    def run(self):
+        import sys, subprocess
+        errno = subprocess.call([sys.executable, '-m', 'pytest'])
+        raise SystemExit(errno)
+
 setup(
     name='phpserialize',
     author='Armin Ronacher',
@@ -31,6 +42,7 @@ setup(
                 'functions of php to python.',
     long_description=get_docs(),
     zip_safe=False,
+    cmdclass = {'test': PyTest},
     classifiers=[
         'License :: OSI Approved :: BSD License',
         'Programming Language :: PHP',
