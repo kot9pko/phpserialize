@@ -238,7 +238,7 @@ r"""
     :copyright: 2007-2008 by Armin Ronacher.
     license: BSD
 """
-from StringIO import StringIO
+from io import StringIO
 
 __author__ = 'Armin Ronacher <armin.ronacher@active-4.com>'
 __version__ = '1.1'
@@ -397,7 +397,7 @@ def load(fp, charset='utf-8', errors='strict', decode_strings=False,
         _expect('{')
         result = []
         last_item = Ellipsis
-        for idx in xrange(items):
+        for idx in range(items):
             item = _unserialize()
             if last_item is Ellipsis:
                 last_item = item
@@ -479,7 +479,7 @@ def dict_to_list(d):
     # array_hook.
     d = dict(d)
     try:
-        return [d[x] for x in xrange(len(d))]
+        return [d[x] for x in range(len(d))]
     except KeyError:
         raise ValueError('dict is not a sequence')
 
